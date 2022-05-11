@@ -33,7 +33,26 @@ weather_data = JSON.parse(response)
 # Use a loop to display the daily summary for the upcoming forecast.
 
 # 1. inspect the weather_data hash
-# puts weather_data
+ #puts weather_data
+
+puts "In #{weather_data["region"]} it is currently #{weather_data["currentConditions"]["temp"]["f"]} degrees and #{weather_data["currentConditions"]["comment"]}"
+
+upcoming_forecast = weather_data["next_days"]
+
+puts "The upcoming weather forecast is..."
+for day in upcoming_forecast
+    puts "#{day["day"]}: a high of #{day["max_temp"]["f"]} and #{day["comment"]}"
+end 
+
+#another way to do it - this version is nicer to your future self
+for daily_forecast_data in weather_data["next_days"]
+    day_of_week = daily_forecast_data["day"]
+    high_temp = daily_forecast_data["max_temp"]["f"]
+    conditions = daily_forecast_data["comment"]
+    puts "#{day_of_week}: a high of #{high_temp} and #{conditions}."
+  end
+
+
 
 # CHALLENGE
 # Can you display the weather forecast summary for a user-entered city?
@@ -42,3 +61,36 @@ weather_data = JSON.parse(response)
 # city = gets.chomp
 # puts city
 # Note: what happens if the user-entered value is not a known city? You'll want to do some error handling.
+
+puts "What city are you in?"
+city = gets.chomp
+puts city
+city = city.gsub(" ", "") #this gets rid of the space in New York so that you can enter it in the URL
+puts city
+
+if weather_data["status"] == "fail"
+
+# ----------------------
+require "net/http"
+require "json"
+url = "https://weatherdbi.herokuapp.com/data/weather/#{city}"
+uri = URI(url)
+response = Net::HTTP.get(uri)
+weather_data = JSON.parse(response)
+# ----------------------
+
+# 1. inspect the weather_data hash
+# puts weather_data
+
+# 2. check if user submits an unknown city and handle edge case
+if weather_data["status"] == "fail"
+    # 3. display error message to the user
+    puts "we don't know that city.  try again."
+    # 4. otherwise, display weather summary for city
+else
+    # 5. get the current temp and conditions
+    current_temp = weather_data["currentConditions"]["temp"]["f"]
+    current_condition = weather_data["currentConditions"]["comment"]
+
+# 6. display string with region, current temp and conditions
+puts "In #{weather_data["region"]} it is currently #{current_temp} and #{current_condition}."
